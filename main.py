@@ -148,8 +148,8 @@ class SimpleApp(QWidget):
             elapsed = end_time - start_time
             QMessageBox.information(
                 self,
-                title="Submitted",
-                text=f"Encryption took {elapsed:.3f} seconds\n\nFile location: {user_data_path('help.txt.enc')}",
+                "Submitted",
+                f"Encryption took {elapsed:.3f} seconds\n\nFile location: {user_data_path('help.txt.enc')}",
             )
         except Exception as exc:
             self.show_error(str(exc))
