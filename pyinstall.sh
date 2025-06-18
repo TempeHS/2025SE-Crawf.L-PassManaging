@@ -3,6 +3,10 @@
 
 clear
 
+# Make sure the repo is up-to-date
+git stash
+git pull
+
 # Install all dependencies
 pip install -r requirements.txt --upgrade
 
