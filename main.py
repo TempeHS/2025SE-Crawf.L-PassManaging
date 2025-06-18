@@ -12,7 +12,7 @@ import sys
 import time
 import os
 
-import pyfiles.arg2id as arg2id
+# import pyfiles.arg2id as arg2id
 import pyfiles.encrypt as encrypt
 
 
@@ -45,8 +45,7 @@ def user_data_path(filename):
 class SimpleApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.hasher = arg2id.Argon2IDHasher()
-        self.encryptor = encrypt.AESFileEncryptor()
+        self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -56,18 +55,27 @@ class SimpleApp(QWidget):
         layout = QVBoxLayout()
 
         # Add a label
-        self.label = QLabel("Enter some text:")
+        self.label = QLabel("Enter a memorable password:")
         layout.addWidget(self.label)
 
-        # Add an input field
-        self.input_field = QLineEdit()
-        self.input_field.setSizePolicy(
+        self.password_field = QLineEdit()
+        self.password_field.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_field.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
-        self.input_field.setTextMargins(
-            0, 0, 0, 0
-        )  # Optional: Adjust margins if needed
-        layout.addWidget(self.input_field)
+        self.password_field.setTextMargins(0, 0, 0, 0)
+        self.password_field.setPlaceholderText("Enter password for encryption:")
+        layout.addWidget(self.password_field)
+
+        # Add a confirm password field
+        self.confirm_password_field = QLineEdit()
+        self.confirm_password_field.setEchoMode(QLineEdit.EchoMode.Password)
+        self.confirm_password_field.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        self.confirm_password_field.setTextMargins(0, 0, 0, 0)
+        self.confirm_password_field.setPlaceholderText("Confirm password:")
+        layout.addWidget(self.confirm_password_field)
 
         # Add a submit button
         self.submit_button = QPushButton("Submit")
@@ -76,6 +84,13 @@ class SimpleApp(QWidget):
 
         # Set the layout for the main window
         self.setLayout(layout)
+
+    def show_error(self, message: str) -> None:
+        """Display errors in a message box.
+        Args:
+            message (str): The error message to display.
+        """
+        QMessageBox.critical(self, "Error", message)
 
     def encode(self, password: str) -> None:
         """Encrypt a file using the provided password.
@@ -89,7 +104,7 @@ class SimpleApp(QWidget):
         encrypted_path = user_data_path("help.txt.enc")
         # decrypted_path = user_data_path("help_de.txt")
         try:
-            self.encryptor.encrypt_file(
+            self.fileencryptor.encrypt_file(
                 password=password,
                 input_path=input_path,
                 output_path=encrypted_path,
@@ -105,29 +120,29 @@ class SimpleApp(QWidget):
         except Exception as exc:
             self.show_error(str(exc))
 
-    def show_error(self, message) -> None:
-        """Display errors in a message box.
-        Args:
-            message (str): The error message to display.
-        """
-        QMessageBox.critical(self, "Error", message)
-
     def show_dialog(self) -> None:
         """
-        Show a dialog with the submitted text and its hashed version (using Argon2ID).
+        Shows a dialog with the time it takes to encrypt the file.
         """
-        text = self.input_field.text()
-        self.raw_password = text
-        self.encode(password=text)
+        text = self.password_field.text()
+        confirm_text = self.confirm_password_field.text()
+        # Check if the passwords match and are not empty
+        if text != confirm_text:
+            self.show_error("Passwords do not match.")
+            return
+        if not text or not confirm_text:
+            self.show_error("Password fields cannot be empty.")
+            return
+        # Encrypt the file and measure the time taken
         try:
             start_time = time.time()
-            hashed = self.hasher.hash(text)
+            self.encode(password=text)
             end_time = time.time()
             elapsed = end_time - start_time
             QMessageBox.information(
                 self,
-                "Submitted",
-                f"Submitted text: {text}\n\nHashed password: {hashed}\n\nHashing took {elapsed:.3f} seconds",
+                title="Submitted",
+                text=f"Encryption took {elapsed:.3f} seconds\n\nFile location: {user_data_path('help.txt.enc')}",
             )
         except Exception as exc:
             self.show_error(str(exc))
