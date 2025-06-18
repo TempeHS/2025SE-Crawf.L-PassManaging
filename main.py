@@ -92,6 +92,13 @@ class SimpleApp(QWidget):
         """
         QMessageBox.critical(self, "Error", message)
 
+    def show_info(self, message: str) -> None:
+        """Display information in a message box.
+        Args:
+            message (str): The information message to display.
+        """
+        QMessageBox.information(self, "Information", message)
+
     def encode(self, password: str) -> None:
         """Encrypt a file using the provided password.
         Args:
@@ -114,9 +121,9 @@ class SimpleApp(QWidget):
             #     input_path=encrypted_path,
             #     output_path=decrypted_path,
             # )
-            QMessageBox.information(
-                self, "Success", "Encryption and decryption completed successfully."
-            )
+            # self.show_info(
+            #     f"File encrypted successfully!\n\nFile location: {encrypted_path}"
+            # )
         except Exception as exc:
             self.show_error(str(exc))
 
