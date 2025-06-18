@@ -86,8 +86,8 @@ class SimpleApp(QWidget):
             self.show_error("Password cannot be empty.")
             return
         input_path = resource_path("help.txt")
-        encrypted_path = user_data_path("help.txt.bin")
-        decrypted_path = user_data_path("help_de.txt")
+        encrypted_path = user_data_path("help.txt.enc")
+        # decrypted_path = user_data_path("help_de.txt")
         try:
             self.encryptor.encrypt_file(
                 password=password,

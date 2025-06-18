@@ -44,13 +44,13 @@ class AESFileEncryptor:
             salt = os.urandom(16)
             key = self._derive_key(salt, password)
             iv = os.urandom(16)
+            file_hash = self._sha3_512_hash(input_path)
+            print(f"SHA3-512 hash of {input_path} (shortened): {file_hash:.12s}...")
             cipher = Cipher(
                 algorithm=algorithms.AES(key),
                 mode=modes.CBC(iv),
                 backend=default_backend(),
             )
-            file_hash = self._sha3_512_hash(input_path)
-            print(f"SHA3-512 hash of {input_path} (shortened): {file_hash:.12s}...")
             encryptor = cipher.encryptor()
             padder = padding.PKCS7(128).padder()
 
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     fe = AESFileEncryptor()
     # Remove the encrypted and decrypted files if they exist
     for file_path in [
-        r"./pyfiles/.testing/pyinstall_help.txt.bin",
+        r"./pyfiles/.testing/pyinstall_help.txt.enc",
         r"./pyfiles/.testing/pyinstalled_help.txt",
     ]:
         try:
@@ -208,17 +208,17 @@ if __name__ == "__main__":
 
     start_encrypt = time.time()
     fe.encrypt_file(
-        password=r".",
+        password=r"safasdfasdfasdfasdfsdfaasdf",
         input_path=r"./pyfiles/.testing/pyinstall_help.txt",
-        output_path=r"./pyfiles/.testing/pyinstall_help.txt.bin",
+        output_path=r"./pyfiles/.testing/pyinstall_help.txt.enc",
     )
     end_encrypt = time.time()
     print(f"Encryption took {end_encrypt - start_encrypt:.3f} seconds.")
 
     start_decrypt = time.time()
     fe.decrypt_file(
-        password=r".",
-        input_path=r"./pyfiles/.testing/pyinstall_help.txt.bin",
+        password=r"safasdfasdfasdfasdfsdfaasdf",
+        input_path=r"./pyfiles/.testing/pyinstall_help.txt.enc",
         output_path=r"./pyfiles/.testing/pyinstalled_help.txt",
     )
     end_decrypt = time.time()
