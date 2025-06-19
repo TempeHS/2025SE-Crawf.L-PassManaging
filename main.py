@@ -90,6 +90,27 @@ class SimpleApp(QWidget):
         # Set the layout for the main window
         self.setLayout(layout)
 
+    def encode(self, password: str) -> None:
+        """Encrypt a file using the provided password.
+        Args:
+            password (str): The password to use for encryption.
+        """
+        if not password:
+            self.show_error("Password cannot be empty.")
+            return
+        input_path = resource_path("help.txt")
+        encrypted_path = user_data_path("help.txt.enc")
+        # decrypted_path = user_data_path("help_de.txt")
+        try:
+            self.fileencryptor.encrypt_file(
+                password=password,
+                input_path=input_path,
+                output_path=encrypted_path,
+            )
+        except Exception as exc:
+            self.message_box.show_error(f"Encryption failed: {str(exc)}")
+            return
+
     def show_dialog(self) -> None:
         """
         Shows a dialog with the time it takes to encrypt the file.
