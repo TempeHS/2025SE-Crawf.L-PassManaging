@@ -14,6 +14,7 @@ import time
 import os
 
 import pyfiles.encrypt as encrypt
+import pyfiles.message_utils as message_utils
 
 
 def resource_path(relative_path):
@@ -47,32 +48,7 @@ class DecodeApp(QWidget):
         super().__init__()
         self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
-
-    def show_error(self, message: str) -> None:
-        """Display errors in a message box that allows copying text.
-        Args:
-            message (str): The error message to display.
-        """
-        box = QMessageBox(self)
-        box.setIcon(QMessageBox.Icon.Critical)
-        box.setWindowTitle("Error")
-        box.setText(message)
-        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        box.exec()
-
-    def show_warning(self, message: str) -> None:
-        """Display warnings in a message box that allows copying text.
-        Args:
-            message (str): The warning message to display.
-        """
-        box = QMessageBox(self)
-        box.setIcon(QMessageBox.Icon.Warning)
-        box.setWindowTitle("Warning")
-        box.setText(message)
-        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        box.exec()
-
-    def show_info(self, message: str) -> None:
+        self.message_box = message_utils.MessageBox(self)
         """Display information in a message box that allows copying text.
         Args:
             message (str): The information message to display.
@@ -88,7 +64,23 @@ class DecodeApp(QWidget):
         """
         Initialise the user interface for the decoder application.
         """
-        pass
+        self.setWindowTitle("File Decryptor")
+
+        # Create layout
+        layout = QVBoxLayout()
+
+        self.label = QLabel("Enter the password to decrypt the file:")
+        layout.addWidget(self.label)
+
+        self.password_input = QLineEdit()
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_input.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        self.password_input.setTextMargins(0, 0, 0, 0)
+        self.password_input.setPlaceholderText("Enter password for decryption:")
+
+        layout.addWidget(self.password_input)
 
     def decode(self, password: str) -> None:
         """Decrypt a file using the provided password.
@@ -106,9 +98,11 @@ class DecodeApp(QWidget):
                 input_path=input_path,
                 output_path=decrypted_path,
             )
-            self.show_info(f"File decrypted successfully to {decrypted_path}")
+            self.message_box.show_info(
+                f"File decrypted successfully to {decrypted_path}"
+            )
         except Exception as e:
-            self.show_error(f"Decryption failed: {str(e)}")
+            self.message_box.show_error(f"Decryption failed: {str(e)}")
 
 
 if __name__ == "__main__":
