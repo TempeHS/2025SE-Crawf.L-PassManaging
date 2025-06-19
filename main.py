@@ -132,7 +132,7 @@ class SimpleApp(QWidget):
             elapsed = end_time - start_time
             self.message_box.show_info(
                 f"""File encrypted successfully!
-                Time taken: {elapsed:.3f} seconds"""
+            Time taken: {elapsed:.3f} seconds"""
             )
         except Exception as exc:
             self.message_box.show_error(str(exc))
