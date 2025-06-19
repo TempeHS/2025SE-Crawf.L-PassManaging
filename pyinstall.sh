@@ -20,7 +20,3 @@ fi
 
 # Create a executable (for testing purposes)
 pyinstaller --clean --noconfirm --debug all --add-data "help.txt;." --noconsole main.py
-
-
-# Copy the help file into the '_internal' directory as 'help.txt'
-cp ./pyinstall_help.txt ./dist/main/_internal/help.txt
