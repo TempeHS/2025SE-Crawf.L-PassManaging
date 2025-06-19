@@ -14,6 +14,7 @@ import time
 import os
 
 import pyfiles.encrypt as encrypt
+import pyfiles.message_utils as message_utils
 
 
 def resource_path(relative_path):
@@ -47,8 +48,14 @@ class SimpleApp(QWidget):
         super().__init__()
         self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
+        self.show_error = message_utils.show_error
+        self.show_warning = message_utils.show_warning
+        self.show_info = message_utils.show_info
 
     def init_ui(self) -> None:
+        """
+        Initialise the user interface of the application.
+        """
         self.setWindowTitle("Simple App")
 
         # Create layout
@@ -85,58 +92,6 @@ class SimpleApp(QWidget):
         # Set the layout for the main window
         self.setLayout(layout)
 
-    def show_error(self, message: str) -> None:
-        """Display errors in a message box that allows copying text.
-        Args:
-            message (str): The error message to display.
-        """
-        box = QMessageBox(self)
-        box.setIcon(QMessageBox.Icon.Critical)
-        box.setWindowTitle("Error")
-        box.setText(message)
-        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        box.exec()
-
-    def show_info(self, message: str) -> None:
-        """Display information in a message box that allows copying text.
-        Args:
-            message (str): The information message to display.
-        """
-        box = QMessageBox(self)
-        box.setIcon(QMessageBox.Icon.Information)
-        box.setWindowTitle("Information")
-        box.setText(message)
-        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        box.exec()
-
-    def encode(self, password: str) -> None:
-        """Encrypt a file using the provided password.
-        Args:
-            password (str): The password to use for encryption.
-        """
-        if not password:
-            self.show_error("Password cannot be empty.")
-            return
-        input_path = resource_path("help.txt")
-        encrypted_path = user_data_path("help.txt.enc")
-        # decrypted_path = user_data_path("help_de.txt")
-        try:
-            self.fileencryptor.encrypt_file(
-                password=password,
-                input_path=input_path,
-                output_path=encrypted_path,
-            )
-            # self.encryptor.decrypt_file(
-            #     password=password,
-            #     input_path=encrypted_path,
-            #     output_path=decrypted_path,
-            # )
-            # self.show_info(
-            #     f"File encrypted successfully!\n\nFile location: {encrypted_path}"
-            # )
-        except Exception as exc:
-            self.show_error(str(exc))
-
     def show_dialog(self) -> None:
         """
         Shows a dialog with the time it takes to encrypt the file.
@@ -156,10 +111,8 @@ class SimpleApp(QWidget):
             self.encode(password=text)
             end_time = time.time()
             elapsed = end_time - start_time
-            QMessageBox.information(
-                self,
-                "Submitted",
-                f"Encryption took {elapsed:.3f} seconds\n\nFile location: {user_data_path('help.txt.enc')}",
+            self.show_info(
+                f"File encrypted successfully!\n\nTime taken: {elapsed:.3f} seconds"
             )
         except Exception as exc:
             self.show_error(str(exc))
