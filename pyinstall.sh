@@ -14,11 +14,12 @@ rm ./dist/*
 
 
 # Remove the ./dist/main directory if it exists
-if [ -d "./dist/main" ]; then
-	rm -rf ./dist/main -Y
+if [ -d "./dist/" ]; then
+	rm -rf ./dist/
 fi
 
 # Create a executable (for testing purposes)
 pyinstaller --clean --noconfirm --debug all --noconsole main.py
 
+# move the 
 cp ./pyinstall_help.txt ./dist/main/_internal/help.txt
