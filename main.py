@@ -130,10 +130,15 @@ class SimpleApp(QWidget):
             self.encode(password=text)
             end_time = time.time()
             elapsed = end_time - start_time
-            self.message_box.show_info(
-                f"""File encrypted successfully!
-Time taken: {elapsed:.3f} seconds"""
-            )
+            if elapsed < 1:
+                elapsed = elapsed * 1000  # Convert to milliseconds
+                self.message_box.show_info(
+                    f"File encrypted successfully! Time taken: {elapsed:.0f} milliseconds"
+                )
+            else:
+                self.message_box.show_info(
+                    f"File encrypted successfully! Time taken: {elapsed:.3f} seconds"
+                )
         except Exception as exc:
             self.message_box.show_error(str(exc))
 
