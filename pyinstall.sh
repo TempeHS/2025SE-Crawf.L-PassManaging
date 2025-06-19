@@ -12,9 +12,6 @@ pip install -r requirements.txt --upgrade
 # clear all files in 'dist/' directory
 rm ./dist/*
 
-# Add the help file to the build
-pyinstaller --add-data "help.txt;." main.py
-
 
 # Remove the ./dist/main directory if it exists
 if [ -d "./dist/main" ]; then
@@ -22,7 +19,7 @@ if [ -d "./dist/main" ]; then
 fi
 
 # Create a executable (for testing purposes)
-pyinstaller --clean --noconfirm --debug all --noconsole main.py
+pyinstaller --clean --noconfirm --debug all --add-data "help.txt;." --noconsole main.py
 
 
 # Copy the help file into the '_internal' directory as 'help.txt'
