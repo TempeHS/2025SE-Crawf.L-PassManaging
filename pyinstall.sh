@@ -4,8 +4,7 @@
 clear
 
 # Make sure the repo is up-to-date
-git stash
-git pull
+git stash && git pull 
 
 # Install all dependencies
 pip install -r requirements.txt --upgrade
@@ -13,7 +12,7 @@ pip install -r requirements.txt --upgrade
 # clear all files in 'dist/' directory
 rm ./dist/*
 
-
+# Add the help file to the build
 pyinstaller --add-data "help.txt;." main.py
 
 
