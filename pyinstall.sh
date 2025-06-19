@@ -18,7 +18,7 @@ pyinstaller --add-data "help.txt;." main.py
 
 # Remove the ./dist/main directory if it exists
 if [ -d "./dist/main" ]; then
-	rm -rf ./dist/main --confirm
+	rm -rf ./dist/main --noconfirm
 fi
 
 # Create a executable (for testing purposes)
