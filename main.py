@@ -14,7 +14,11 @@ import time
 import os
 
 import pyfiles.encrypt as encrypt
-import pyfiles.message_utils as message_utils
+from pyfiles.message_utils import (
+    show_error,
+    show_warning,
+    show_info,
+)
 
 
 def resource_path(relative_path):
@@ -48,9 +52,9 @@ class SimpleApp(QWidget):
         super().__init__()
         self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
-        self.show_error = message_utils.show_error
-        self.show_warning = message_utils.show_warning
-        self.show_info = message_utils.show_info
+        self.show_error = show_error
+        self.show_warning = show_warning
+        self.show_info = show_info
 
     def init_ui(self) -> None:
         """
