@@ -2,40 +2,44 @@ from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import Qt
 
 
-def show_error(parent, message: str) -> None:
-    """Display errors in a message box that allows copying text.
-    Args:
-        message (str): The error message to display.
-    """
-    box = QMessageBox()
-    box.setIcon(QMessageBox.Icon.Critical)
-    box.setWindowTitle("Error")
-    box.setText(message)
-    box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-    box.exec()
+class MessageBox(QMessageBox):
+    """Custom boxes that allows copying text."""
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+        self.setStandardButtons(QMessageBox.StandardButton.Ok)
+        self.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
-def show_warning(parent, message: str) -> None:
-    """Display warnings in a message box that allows copying text.
-    Args:
-        message (str): The warning message to display.
-    """
-    box = QMessageBox()
-    box.setIcon(QMessageBox.Icon.Warning)
-    box.setWindowTitle("Warning")
-    box.setText(message)
-    box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-    box.exec()
+    def show_error(self, message: str) -> None:
+        """
+        Show an error message box with the given title and message.
+        Args:
+            message (str): The error message to display.
+        """
+        self.setIcon(QMessageBox.Icon.Critical)
+        self.setWindowTitle("Error")
+        self.setText(message)
+        self.exec()
 
+    def show_warning(self, message: str) -> None:
+        """
+        Show a warning message box with the given title and message.
+        Args:
+            message (str): The warning message to display.
+        """
+        self.setIcon(QMessageBox.Icon.Warning)
+        self.setWindowTitle("Warning")
+        self.setText(message)
+        self.exec()
 
-def show_info(parent, message: str) -> None:
-    """Display information in a message box that allows copying text.
-    Args:
-        message (str): The information message to display.
-    """
-    box = QMessageBox()
-    box.setIcon(QMessageBox.Icon.Information)
-    box.setWindowTitle("Information")
-    box.setText(message)
-    box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-    box.exec()
+    def show_info(self, message: str) -> None:
+        """
+        Show an information message box with the given title and message.
+        Args:
+            message (str): The information message to display.
+        """
+        self.setIcon(QMessageBox.Icon.Information)
+        self.setWindowTitle("Information")
+        self.setText(message)
+        self.exec()

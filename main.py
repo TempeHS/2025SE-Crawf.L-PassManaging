@@ -14,11 +14,7 @@ import time
 import os
 
 import pyfiles.encrypt as encrypt
-from pyfiles.message_utils import (
-    show_error,
-    show_warning,
-    show_info,
-)
+import pyfiles.message_utils as message_utils
 
 
 def resource_path(relative_path):
@@ -52,9 +48,7 @@ class SimpleApp(QWidget):
         super().__init__()
         self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
-        self.show_error = show_error
-        self.show_warning = show_warning
-        self.show_info = show_info
+        self.message_box = message_utils.MessageBox(self)
 
     def init_ui(self) -> None:
         """
@@ -104,10 +98,10 @@ class SimpleApp(QWidget):
         confirm_text = self.confirm_password_field.text()
         # Check if the passwords match and are not empty
         if text != confirm_text:
-            self.show_error("Passwords do not match.")
+            self.message_box.show_error("Passwords do not match.")
             return
         if not text or not confirm_text:
-            self.show_error("Password fields cannot be empty.")
+            self.message_box.show_error("Password fields cannot be empty.")
             return
         # Encrypt the file and measure the time taken
         try:
@@ -115,11 +109,12 @@ class SimpleApp(QWidget):
             self.encode(password=text)
             end_time = time.time()
             elapsed = end_time - start_time
-            self.show_info(
-                f"File encrypted successfully!\n\nTime taken: {elapsed:.3f} seconds"
+            self.message_box.show_info(
+                f"""File encrypted successfully!
+                Time taken: {elapsed:.3f} seconds"""
             )
         except Exception as exc:
-            self.show_error(str(exc))
+            self.message_box.show_error(str(exc))
 
 
 if __name__ == "__main__":
