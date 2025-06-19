@@ -8,11 +8,11 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QSizePolicy,
 )
+from PyQt6.QtCore import Qt
 import sys
 import time
 import os
 
-# import pyfiles.arg2id as arg2id
 import pyfiles.encrypt as encrypt
 
 
@@ -86,18 +86,28 @@ class SimpleApp(QWidget):
         self.setLayout(layout)
 
     def show_error(self, message: str) -> None:
-        """Display errors in a message box.
+        """Display errors in a message box that allows copying text.
         Args:
             message (str): The error message to display.
         """
-        QMessageBox.critical(self, "Error", message)
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Critical)
+        box.setWindowTitle("Error")
+        box.setText(message)
+        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        box.exec()
 
     def show_info(self, message: str) -> None:
-        """Display information in a message box.
+        """Display information in a message box that allows copying text.
         Args:
             message (str): The information message to display.
         """
-        QMessageBox.information(self, "Information", message)
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Information)
+        box.setWindowTitle("Information")
+        box.setText(message)
+        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        box.exec()
 
     def encode(self, password: str) -> None:
         """Encrypt a file using the provided password.
