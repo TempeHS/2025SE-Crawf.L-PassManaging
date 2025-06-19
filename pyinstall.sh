@@ -15,8 +15,10 @@ rm ./dist/*
 
 # Remove the ./dist/main directory if it exists
 if [ -d "./dist/main" ]; then
-	rm -rf ./dist/main --noconfirm
+	rm -rf ./dist/main -Y
 fi
 
 # Create a executable (for testing purposes)
-pyinstaller --clean --noconfirm --debug all --add-data "help.txt;." --noconsole main.py
+pyinstaller --clean --noconfirm --debug all --noconsole main.py
+
+cp ./pyinstall_help.txt ./dist/main/_internal/help.txt

@@ -9,7 +9,7 @@
 		"*": true,
 		"plaintext": false,
 		"markdown": false,
-		"python": false,
+		"python": true,
 		"css": false,
 		"sql": false
 	},
