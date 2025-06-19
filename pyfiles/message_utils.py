@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import Qt
 
 
-def show_error(self, message: str) -> None:
+def show_error(parent, message: str) -> None:
     """Display errors in a message box that allows copying text.
     Args:
         message (str): The error message to display.
@@ -15,7 +15,7 @@ def show_error(self, message: str) -> None:
     box.exec()
 
 
-def show_warning(self, message: str) -> None:
+def show_warning(parent, message: str) -> None:
     """Display warnings in a message box that allows copying text.
     Args:
         message (str): The warning message to display.
@@ -28,7 +28,7 @@ def show_warning(self, message: str) -> None:
     box.exec()
 
 
-def show_info(self, message: str) -> None:
+def show_info(parent, message: str) -> None:
     """Display information in a message box that allows copying text.
     Args:
         message (str): The information message to display.
