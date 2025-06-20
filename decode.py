@@ -49,16 +49,6 @@ class DecodeApp(QWidget):
         self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
         self.message_box = message_utils.MessageBox(self)
-        """Display information in a message box that allows copying text.
-        Args:
-            message (str): The information message to display.
-        """
-        box = QMessageBox(self)
-        box.setIcon(QMessageBox.Icon.Information)
-        box.setWindowTitle("Information")
-        box.setText(message)
-        box.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        box.exec()
 
     def init_ui(self) -> None:
         """
