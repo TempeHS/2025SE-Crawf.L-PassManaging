@@ -1,6 +1,6 @@
 import argon2
 
-TIME_COST_DEFAULT: int = 32
+TIME_COST_DEFAULT: int = 14
 MEMORY_COST_DEFAULT: int = 131072  # 128 MiB
 PARALLELISM_DEFAULT: int = 4
 HASH_LEN_DEFAULT: int = 32
@@ -15,7 +15,7 @@ def mib_to_kib(mebi: int):
         mebi (int): The number of mebibytes to convert.
 
     Returns:
-        int: The equivalent number of kibibytes.
+        kibi (int): The equivalent number of kibibytes.
     """
     kibi = mebi * 1024
     return kibi
@@ -29,14 +29,13 @@ def gib_to_kib(gibi: int):
         gibi (int): The number of gibibytes to convert.
 
     Returns:
-        int: The equivalent number of kibibytes.
+        kibi (int): The equivalent number of kibibytes.
     """
     kibi = gibi * (1024**2)
     return kibi
 
 
 class Argon2IDHasher:
-
     def __init__(
         self,
         time_cost: int = TIME_COST_DEFAULT,
@@ -50,7 +49,7 @@ class Argon2IDHasher:
 
         Args:
             time_cost (int): The number of iterations to perform when hashing. Higher values increase computation time and security.
-                _Default_: 32 iterations
+                _Default_: 14 iterations
             memory_cost (int): The amount of memory (in kibibytes) to use during hashing. Higher values increase security.
                 _Default_: 128 MiB
             parallelism (int): The number of parallel threads to use for hashing.
@@ -61,7 +60,7 @@ class Argon2IDHasher:
                 _Default_: 16 bytes
 
         Sets up the internal Argon2ID PasswordHasher instance with the specified parameters.
-        If any parameter is below its default value, it will be set to the default.
+        IT IS HIGHLY RECOMMENDED TO USE THE DEFAULT VALUES FOR SECURITY REASONS.
         """
 
         if time_cost < TIME_COST_DEFAULT:
@@ -103,6 +102,9 @@ class Argon2IDHasher:
 
         Returns:
             bool: True if the password matches the hash, False otherwise.
+
+        Raises:
+            argon2.exceptions.VerifyMismatchError: If the password does not match the hash.
         """
 
         try:
