@@ -22,6 +22,10 @@ def resource_path(relative_path):
     Get the absolute path to a resource, works for dev and for PyInstaller bundle.
     This function checks if the application is running as a PyInstaller bundle
     and adjusts the path accordingly. If not, it uses the current file's directory.
+    Args:
+        relative_path (str): The relative path to the resource.
+    Returns:
+        str: The absolute path to the resource.
     """
     if hasattr(sys, "_MEIPASS"):
         # If running as a PyInstaller bundle
@@ -36,6 +40,10 @@ def user_data_path(filename):
     Get a path for user data files in the user's home directory.
     This function creates a directory named ".simple_app_data" in the user's home
     directory if it does not exist, and returns the full path to the specified filename.
+    Args:
+        filename (str): The name of the file to be stored in the user data directory.
+    Returns:
+        str: The full path to the specified file in the user data directory.
     """
     home_dir = os.path.expanduser("~")
     app_dir = os.path.join(home_dir, ".simple_app_data")
@@ -59,9 +67,11 @@ class DecodeApp(QWidget):
         # Create layout
         layout = QVBoxLayout()
 
+        # label
         self.label = QLabel("Enter the password to decrypt the file:")
         layout.addWidget(self.label)
 
+        # password input
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setSizePolicy(
@@ -69,17 +79,21 @@ class DecodeApp(QWidget):
         )
         self.password_input.setTextMargins(0, 0, 0, 0)
         self.password_input.setPlaceholderText("Enter password for decryption:")
-
         layout.addWidget(self.password_input)
+
+        # submit button
+        self.submit_button = QPushButton("Decrypt File")
+        self.submit_button.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        self.submit_button.clicked.connect(self.on_submit)
+        layout.addWidget(self.submit_button)
 
     def decode(self, password: str) -> None:
         """Decrypt a file using the provided password.
         Args:
             password (str): The password to use for decryption.
         """
-        if not password:
-            self.show_error("Password cannot be empty.")
-            return
         input_path = user_data_path("help.txt.enc")
         decrypted_path = user_data_path("help_de.txt")
         try:
@@ -88,11 +102,35 @@ class DecodeApp(QWidget):
                 input_path=input_path,
                 output_path=decrypted_path,
             )
-            self.message_box.show_info(
-                f"File decrypted successfully to {decrypted_path}"
-            )
         except Exception as e:
             self.message_box.show_error(f"Decryption failed: {str(e)}")
+
+    def on_submit(self) -> None:
+        password = self.password_input.text()
+        if not password:
+            self.message_box.show_warning("Password cannot be empty.")
+            return
+        try:
+            start_time = time.time()
+            self.decode(password)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            if elapsed_time < 1:
+                self.message_box.show_info(
+                    f"Decryption completed in {elapsed_time * 1000:.0f} milliseconds."
+                )
+            else:
+                self.message_box.show_info(
+                    f"Decryption completed in {elapsed_time:.3f} seconds."
+                )
+        except FileNotFoundError:
+            self.message_box.show_error(
+                rf"The encrypted file does not exist. The file should exist at {user_data_path('help.txt.enc')}."
+            )
+            return
+        except Exception as e:
+            self.message_box.show_error(f"An error occurred: {str(e)}")
+            return
 
 
 if __name__ == "__main__":

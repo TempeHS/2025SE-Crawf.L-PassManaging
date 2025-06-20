@@ -119,10 +119,10 @@ class SimpleApp(QWidget):
         confirm_text = self.confirm_password_field.text()
         # Check if the passwords match and are not empty
         if text != confirm_text:
-            self.message_box.show_error("Passwords do not match.")
+            self.message_box.show_warning("Passwords do not match.")
             return
         if not text or not confirm_text:
-            self.message_box.show_error("Password fields cannot be empty.")
+            self.message_box.show_warning("Password fields cannot be empty.")
             return
         # Encrypt the file and measure the time taken
         try:
@@ -131,9 +131,8 @@ class SimpleApp(QWidget):
             end_time = time.time()
             elapsed = end_time - start_time
             if elapsed < 1:
-                elapsed = elapsed * 1000  # Convert to milliseconds
                 self.message_box.show_info(
-                    f"File encrypted successfully! Time taken: {elapsed:.0f} milliseconds"
+                    f"File encrypted successfully! Time taken: {elapsed * 1000:.0f} milliseconds"
                 )
             else:
                 self.message_box.show_info(
