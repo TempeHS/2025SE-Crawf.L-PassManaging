@@ -9,17 +9,14 @@ git stash && git pull
 # Install all dependencies
 pip install -r requirements.txt --upgrade
 
-# clear all files in 'dist/' directory
-rm ./dist/*
-
-
 # Remove the ./dist/main directory if it exists
 if [ -d "./dist/" ]; then
 	rm -rf ./dist/
 fi
 
 # Create a executable (for testing purposes)
-pyinstaller --clean --noconfirm --debug all --noconsole main.py
+pyinstaller --clean --noconfirm --debug all --noconsole encode.py
+pyinstaller --clean --noconfirm --debug all --noconsole decode.py
 
-# move the 
+# move the executables to the main directory
 cp ./pyinstall_help.txt ./dist/main/_internal/help.txt
