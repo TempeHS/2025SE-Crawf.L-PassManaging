@@ -10,8 +10,13 @@ import hashlib
 class AESFileEncryptor:
     """AES-256 file encryptor and decryptor using Argon2ID-based key derivation."""
 
-    def __init__(self):
-        pass
+    def __init__(self, parent=None):
+        """
+        Optionally accept a parent object for integration with GUI frameworks.
+        Args:
+            parent (object, optional): Parent object, e.g., a QWidget. Defaults to None.
+        """
+        self.parent = parent
 
     def _derive_key(self, salt: bytes, password: str) -> bytes:
         """Derive a 256-bit key from the password and salt using Argon2ID."""

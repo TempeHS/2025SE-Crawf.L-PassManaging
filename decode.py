@@ -54,8 +54,8 @@ def user_data_path(filename):
 class DecodeApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.fileencryptor = encrypt.AESFileEncryptor()
         self.init_ui()
+        self.file_encryptor = encrypt.AESFileEncryptor(self)
         self.message_box = message_utils.MessageBox(self)
 
     def init_ui(self) -> None:
@@ -97,7 +97,7 @@ class DecodeApp(QWidget):
         input_path = user_data_path("help.txt.enc")
         decrypted_path = user_data_path("help_de.txt")
         try:
-            self.fileencryptor.decrypt_file(
+            self.file_encryptor.decrypt_file(
                 password=password,
                 input_path=input_path,
                 output_path=decrypted_path,
@@ -106,6 +106,13 @@ class DecodeApp(QWidget):
             self.message_box.show_error(f"Decryption failed: {str(e)}")
 
     def on_submit(self) -> None:
+        """
+        Handle the submit button click event.
+
+        This method retrieves the password from the input field, validates it,
+        and attempts to decrypt the file. It also measures the time taken for decryption
+        and displays appropriate messages based on the outcome.
+        """
         password = self.password_input.text()
         if not password:
             self.message_box.show_warning("Password cannot be empty.")

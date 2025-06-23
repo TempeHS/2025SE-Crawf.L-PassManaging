@@ -96,7 +96,7 @@ class SimpleApp(QWidget):
             password (str): The password to use for encryption.
         """
         if not password:
-            self.show_error("Password cannot be empty.")
+            self.message_box.show_warning("Password cannot be empty.")
             return
         input_path = resource_path("help.txt")
         encrypted_path = user_data_path("help.txt.enc")
