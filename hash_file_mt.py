@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 import concurrent.futures
+import hashlib
 
 # Set source and destination directories
 src_dirs = ["./dist/encode", "./dist/decode"]
@@ -27,15 +28,32 @@ for src_dir in src_dirs:
             copied.add(dest)
 
 
+def sha2_256_hash(filepath):
+    """Compute SHA2-256 hash of a file."""
+    hash_obj = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            hash_obj.update(chunk)
+    return hash_obj.hexdigest()
+
+
 def copy_file(job):
     src, dest, relpath = job
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     start = time.time()
     shutil.copy2(src, dest)
     end = time.time()
+    src_hash = sha2_256_hash(src)
+    dest_hash = sha2_256_hash(dest)
+    hash_status = (
+        "OK" if src_hash == dest_hash else "MISMATCH"
+    )  # Warn if hashes do not match
     print(
-        f"Copied: {relpath} [COPY TIMESTAMP] {time.strftime('%Y-%m-%d %H:%M:%S')} duration: {end-start:.4f}s"
+        f"Copied: {relpath} [COPY TIMESTAMP] {time.strftime('%Y-%m-%d %H:%M:%S')} duration: {end-start:.4f}s\n"
+        f"  SHA2-256 src:  {src_hash}\n  SHA2-256 dest: {dest_hash}\n  Hash check: {hash_status}"
     )
+    if hash_status != "OK":
+        print(f"WARNING: Hash mismatch for {relpath}! File may be corrupted.")
 
 
 start_all = time.time()
