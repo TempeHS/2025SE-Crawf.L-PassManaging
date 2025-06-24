@@ -23,4 +23,4 @@ pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build encod
 pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build decode.py
 
 # Merge files using cross-platform Python script
-python hash_file_mt.py
+python ./building/hash_file_mt.py
