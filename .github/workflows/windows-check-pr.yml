@@ -1,49 +1,73 @@
 name: Check Windows executable build
 
 on:
-  pull_request:
-    branches:
-      - main
+    pull_request:
+        branches:
+            - main
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        runtime:
-          - win-x64
-          - win-arm64
-        include:
-        - runtime: win-x64
-          os: windows-latest
+    build:
+        strategy:
+            matrix:
+                runtime:
+                    - win-x64
+                    - win-arm64
+                include:
+                    - runtime: win-x64
+                      os: windows-latest
 
-        - runtime: win-arm64
-          os: windows-latest
-    runs-on: ${{ matrix.os }}
+                    - runtime: win-arm64
+                      os: windows-latest
+        runs-on: ${{ matrix.os }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
 
-      - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+            - name: Install python dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt --upgrade
+                  pip install pyinstaller
 
-      - name: Test build executable
-        run: |
-          pyinstaller --clean --noconfirm --windowed --onefile --debug all main.py
+            - name: Test build executable
+              run: |
+                  pyinstaller --clean --noconfirm --noconsole encode.py
+                  pyinstaller --clean --noconfirm --noconsole decode.py
 
-      - name: Upload executable artifact (${{ matrix.runtime }})
-        uses: actions/upload-artifact@v4
-        with:
-          name: PassManaging-${{ matrix.runtime }}-PR_${{ github.event.pull_request.number }}
-          path: dist/
+            - name: Check if executable is built
+              run: |
+                  if [ ! -f dist/encode.exe ]; then
+                    echo "Encode executable not found!"
+                    exit 1
+                  fi
+                  if [ ! -f dist/decode.exe ]; then
+                    echo "Decode executable not found!"
+                    exit 1
+                  fi
+
+            - name: Upload executable artifact (${{ matrix.runtime }})
+              uses: actions/upload-artifact@v4
+              with:
+                  name: executables-${{ matrix.runtime }}
+                  path: |
+                      dist/encode.exe
+                      dist/decode.exe
+
+            - name: Compress executables into a zip file
+              run: |
+                  powershell Compress-Archive -Path dist/encode.exe,dist/decode.exe -DestinationPath dist/executables-${{ matrix.runtime }}.zip
+
+            - name: Upload zip archive
+              uses: actions/upload-artifact@v4
+              with:
+                  name: executables-zip-${{ matrix.runtime }}
+                  path: dist/executables-${{ matrix.runtime }}.zip
