@@ -58,14 +58,20 @@ awk '{print $1, $2}' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read 
         mkdir -p "$(dirname "$dest")"
         final_hash="${final_hashes[$relpath]}"
         if [ -z "$final_hash" ]; then
+            start_time=$(date +%s.%N)
             cp "$src" "$dest"
-            echo "Copied: $relpath (new file)"
+            end_time=$(date +%s.%N)
+            duration=$(echo "$end_time - $start_time" | bc)
+            echo "Copied: $relpath (new file) [COPY TIMESTAMP] $(date '+%Y-%m-%d %H:%M:%S') duration: ${duration}s"
             final_hashes["$relpath"]="$hash"
         else
             echo "[DEBUG] Comparing dest hash: $final_hash with source hash: $hash for $relpath"
             if [ "$final_hash" != "$hash" ]; then
+                start_time=$(date +%s.%N)
                 cp "$src" "$dest"
-                echo "Overwritten: $relpath (different content)"
+                end_time=$(date +%s.%N)
+                duration=$(echo "$end_time - $start_time" | bc)
+                echo "Overwritten: $relpath (different content) [COPY TIMESTAMP] $(date '+%Y-%m-%d %H:%M:%S') duration: ${duration}s"
                 final_hashes["$relpath"]="$hash"
             else
                 echo "Skipped: $relpath (identical file exists)"
