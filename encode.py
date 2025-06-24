@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 from PyQt6.QtCore import Qt
+import sqlite3 as sql
 import sys
 import time
 import os
@@ -22,6 +23,10 @@ def resource_path(relative_path):
     Get the absolute path to a resource, works for dev and for PyInstaller bundle.
     This function checks if the application is running as a PyInstaller bundle
     and adjusts the path accordingly. If not, it uses the current file's directory.
+    Args:
+        relative_path (str): The relative path to the resource.
+    Returns:
+        str: The absolute path to the resource.
     """
     if hasattr(sys, "_MEIPASS"):
         # If running as a PyInstaller bundle
@@ -35,7 +40,15 @@ def user_data_path(filename):
     """
     Get a path for user data files in the user's home directory.
     This function creates a directory named ".simple_app_data" in the user's home
-    directory if it does not exist, and returns the full path to the specified filename.
+    directory. If it does not exist, and returns the full path to the specified filename.
+    ### For Windows:
+        "C:\Users\<username>\.simple_app_data\<filename>"
+    ### For Linux/Mac:
+        "/home/<username>/.simple_app_data/<filename>"
+    Args:
+        filename (str): The name of the file to be stored in the user data directory.
+    Returns:
+        str: The full path to the specified file in the user data directory.
     """
     home_dir = os.path.expanduser("~")
     app_dir = os.path.join(home_dir, ".simple_app_data")
@@ -46,9 +59,9 @@ def user_data_path(filename):
 class SimpleApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.fileencryptor = encrypt.AESFileEncryptor()
-        self.init_ui()
+        self.fileencryptor = encrypt.AESFileEncryptor(self)
         self.message_box = message_utils.MessageBox(self)
+        self.init_ui()
 
     def init_ui(self) -> None:
         """
@@ -98,15 +111,37 @@ class SimpleApp(QWidget):
         if not password:
             self.message_box.show_warning("Password cannot be empty.")
             return
-        input_path = resource_path("help.txt")
-        encrypted_path = user_data_path("help.txt.enc")
-        # decrypted_path = user_data_path("help_de.txt")
+        if not os.path.exists(resource_path("template.db")):
+            # create a template database if it does not exist
+            conn = sql.connect(resource_path("template.db"))
+            cur = conn.cursor()
+
+            # Create a SQLite3 database the structure `name,url,username,password,note`
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS credentials (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    username TEXT NOT NULL,
+                    password TEXT NOT NULL,
+                    note TEXT
+                )
+                """
+            )
+            conn.commit()
+            conn.close()
+
+        input_path = resource_path("template.db")
+        encrypted_path = user_data_path("passes.db.enc")
+        # decrypted_path = user_data_path("passes_de.db")
         try:
             self.fileencryptor.encrypt_file(
                 password=password,
                 input_path=input_path,
                 output_path=encrypted_path,
             )
+
         except Exception as exc:
             self.message_box.show_error(f"Encryption failed: {str(exc)}")
             return
@@ -126,9 +161,9 @@ class SimpleApp(QWidget):
             return
         # Encrypt the file and measure the time taken
         try:
-            start_time = time.time()
+            start_time = time.perf_counter()
             self.encode(password=text)
-            end_time = time.time()
+            end_time = time.perf_counter()
             elapsed = end_time - start_time
             if elapsed < 1:
                 self.message_box.show_info(

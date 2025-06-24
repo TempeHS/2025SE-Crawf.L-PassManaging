@@ -16,7 +16,6 @@ fi
 
 # Create a executable (for testing purposes)
 pyinstaller --clean --noconfirm --debug all --noconsole encode.py
-pyinstaller --clean --noconfirm --debug all --noconsole decode.py
+pyinstaller --clean --noconfirm --debug all --noconsole decode.py 
 
-# move the executables to the main directory
-cp ./pyinstall_help.txt ./dist/main/_internal/help.txt
+# 

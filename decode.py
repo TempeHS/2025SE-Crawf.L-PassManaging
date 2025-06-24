@@ -39,7 +39,11 @@ def user_data_path(filename):
     """
     Get a path for user data files in the user's home directory.
     This function creates a directory named ".simple_app_data" in the user's home
-    directory if it does not exist, and returns the full path to the specified filename.
+    directory. If it does not exist, and returns the full path to the specified filename.
+    ### For Windows:
+        "C:\Users\<username>\.simple_app_data\<filename>"
+    ### For Linux/Mac:
+        "/home/<username>/.simple_app_data/<filename>"
     Args:
         filename (str): The name of the file to be stored in the user data directory.
     Returns:
@@ -47,16 +51,16 @@ def user_data_path(filename):
     """
     home_dir = os.path.expanduser("~")
     app_dir = os.path.join(home_dir, ".simple_app_data")
-    os.makedirs(name=app_dir, exist_ok=True)
+    os.makedirs(app_dir, exist_ok=True)
     return os.path.join(app_dir, filename)
 
 
 class DecodeApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.init_ui()
         self.file_encryptor = encrypt.AESFileEncryptor(self)
         self.message_box = message_utils.MessageBox(self)
+        self.init_ui()
 
     def init_ui(self) -> None:
         """
@@ -86,24 +90,8 @@ class DecodeApp(QWidget):
         self.submit_button.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
-        self.submit_button.clicked.connect(self.on_submit)
+        self.submit_button.clicked.connect(self.on_submit())
         layout.addWidget(self.submit_button)
-
-    def decode(self, password: str) -> None:
-        """Decrypt a file using the provided password.
-        Args:
-            password (str): The password to use for decryption.
-        """
-        input_path = user_data_path("help.txt.enc")
-        decrypted_path = user_data_path("help_de.txt")
-        try:
-            self.file_encryptor.decrypt_file(
-                password=password,
-                input_path=input_path,
-                output_path=decrypted_path,
-            )
-        except Exception as e:
-            self.message_box.show_error(f"Decryption failed: {str(e)}")
 
     def on_submit(self) -> None:
         """
@@ -118,26 +106,45 @@ class DecodeApp(QWidget):
             self.message_box.show_warning("Password cannot be empty.")
             return
         try:
-            start_time = time.time()
-            self.decode(password)
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            if elapsed_time < 1:
-                self.message_box.show_info(
-                    f"Decryption completed in {elapsed_time * 1000:.0f} milliseconds."
-                )
-            else:
-                self.message_box.show_info(
-                    f"Decryption completed in {elapsed_time:.3f} seconds."
-                )
+            start_time = time.perf_counter()
+            result = self.decode(password)
+            end_time = time.perf_counter()
+            if result is None:
+                elapsed_time = end_time - start_time
+                if elapsed_time < 1:
+                    self.message_box.show_info(
+                        f"Decryption completed in {elapsed_time * 1000:.0f} milliseconds."
+                    )
+                else:
+                    self.message_box.show_info(
+                        f"Decryption completed in {elapsed_time:.3f} seconds."
+                    )
         except FileNotFoundError:
             self.message_box.show_error(
-                rf"The encrypted file does not exist. The file should exist at {user_data_path('help.txt.enc')}."
+                rf"The encrypted file does not exist. The file should exist at {user_data_path(result)}."
             )
             return
         except Exception as e:
             self.message_box.show_error(f"An error occurred: {str(e)}")
             return
+
+    def decode(self, password: str) -> None:
+        """Decrypt a file using the provided password.
+        Args:
+            password (str): The password to use for decryption.
+        """
+        input_path = user_data_path("passes.db.enc")
+        decrypted_path = user_data_path("passes_de.db")
+        try:
+            self.file_encryptor.decrypt_file(
+                password=password,
+                input_path=input_path,
+                output_path=decrypted_path,
+            )
+            return None
+        except Exception as e:
+            self.message_box.show_error(f"Decryption failed: {str(e)}")
+            return input_path
 
 
 if __name__ == "__main__":
