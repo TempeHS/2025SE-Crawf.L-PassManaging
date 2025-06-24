@@ -1,19 +1,25 @@
 #!/bin/bash
-# Make sure to run this script from the root directory of the project
+# Please run this script from the root directory of the project
 
 clear
 
-# Make sure the repo is up-to-date
+# Ensure the repository is up-to-date
 git stash && git pull 
 
 # Install all dependencies
 pip install -r requirements.txt --upgrade
 
-# Remove the ./dist/main directory if it exists
+# Remove the ./dist directory if it exists
 if [ -d "./dist/" ]; then
-	rm -rf ./dist/
+    rm -rf ./dist/
 fi
 
-# Create a executable (for testing purposes)
-pyinstaller --clean --noconfirm --debug all --noconsole --distpath ./dist/_internal encode.py
-pyinstaller --clean --noconfirm --debug all --noconsole --distpath ./dist/_internal decode.py
+# Create the unified _internal directory for PyInstaller intermediates and shared libs
+mkdir -p ./dist/_internal
+
+# Build executables; .exe files go in ./dist, shared libs in ./dist/_internal
+pyinstaller --clean --noconfirm --debug all --noconsole \
+    --workpath ./dist/_internal --specpath ./dist/_internal encode.py
+
+pyinstaller --clean --noconfirm --debug all --noconsole \
+    --workpath ./dist/_internal --specpath ./dist/_internal decode.py
