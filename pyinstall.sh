@@ -43,9 +43,11 @@ python -c "$hash_files_py" ./dist/encode > /tmp/encode_hashes.txt
 python -c "$hash_files_py" ./dist/decode > /tmp/decode_hashes.txt
 
 # Merge hashes, keeping track of what has been copied
-cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
-    # Skip lines that do not have both hash and relpath
+awk 'NF==2' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
+    # Remove leading/trailing whitespace from relpath
+    relpath="$(echo "$relpath" | xargs)"
     if [ -z "$hash" ] || [ -z "$relpath" ]; then
+        echo "Skipped: malformed line (hash='$hash', relpath='$relpath')"
         continue
     fi
 
