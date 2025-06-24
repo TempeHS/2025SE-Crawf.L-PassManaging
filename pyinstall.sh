@@ -18,63 +18,40 @@ else
 fi
 
 # Build executables; .exe files go in ./dist
-pyinstaller --clean --noconfirm --debug all --noconsole \
-	--specpath ./build encode.py
+pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build encode.py
 
-pyinstaller --clean --noconfirm --debug all --noconsole \
-	--specpath ./build decode.py
+pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build decode.py
 
-# Merge the ./dist/encode and ./dist/decode folders into ./dist/final
+# Merge unique files from encode and decode into final, preserving subdirectory structure
 mkdir -p ./dist/final
 
-# # Copy unique files from encode
-# if [ -d "./dist/encode" ]; then
-# 	for file in ./dist/encode/*; do
-# 		basefile=$(basename "$file")
-# 		if [ ! -e "./dist/final/$basefile" ]; then
-# 			cp -r "$file" ./dist/final/
-# 		fi
-# 	done
-# fi
+# Function to process a directory (encode or decode)
+process_dir() {
+    src_dir="$1"
+    find "$src_dir" -type f | while read -r src_file; do
+        rel_path="${src_file#$src_dir/}"
+        dest_file="./dist/final/$rel_path"
+        src_hash=$(sha3sum -a 512 "$src_file" | awk '{print $1}')
+        if [ -f "$dest_file" ]; then
+            dest_hash=$(sha3sum -a 512 "$dest_file" | awk '{print $1}')
+            if [ "$src_hash" != "$dest_hash" ]; then
+                # Different content, copy and overwrite
+                mkdir -p "$(dirname "$dest_file")"
+                cp "$src_file" "$dest_file"
+                echo "Overwritten: $rel_path (different content)"
+            else
+                echo "Skipped: $rel_path (identical file exists)"
+            fi
+        else
+            # File does not exist, copy and preserve subdirs
+            mkdir -p "$(dirname "$dest_file")"
+            cp "$src_file" "$dest_file"
+            echo "Copied: $rel_path (new file)"
+        fi
+    done
+}
 
-# # Copy unique files from decode
-# if [ -d "./dist/decode" ]; then
-# 	for file in ./dist/decode/*; do
-# 		basefile=$(basename "$file")
-# 		if [ ! -e "./dist/final/$basefile" ]; then
-# 			cp -r "$file" ./dist/final/
-# 		fi
-# 	done
-# fi
+process_dir ./dist/encode
+process_dir ./dist/decode
 
-# use sha3-512 to compare files and copy unique files
-# if there are files with the same name, but different content, they will be copied
-if [ -d "./dist/encode" ]; then
-	for file in ./dist/encode/*; do
-		basefile=$(basename "$file")
-		if [ ! -e "./dist/final/$basefile" ]; then
-			cp -r "$file" ./dist/final/
-		else
-			# Compare files using sha3-512
-			if ! sha3sum "$file" | cut -d ' ' -f 1 | grep -q "$(sha3sum "./dist/final/$basefile" | cut -d ' ' -f 1)"; then
-				cp -r "$file" "./dist/final/$basefile"
-			fi
-		fi
-	done
-fi
-
-if [ -d "./dist/decode" ]; then
-	for file in ./dist/decode/*; do
-		basefile=$(basename "$file")
-		if [ ! -e "./dist/final/$basefile" ]; then
-			cp -r "$file" ./dist/final/
-		else
-			# Compare files using sha3-512
-			if ! sha3sum "$file" | cut -d ' ' -f 1 | grep -q "$(sha3sum "./dist/final/$basefile" | cut -d ' ' -f 1)"; then
-				cp -r "$file" "./dist/final/$basefile"
-			fi
-		fi
-	done
-fi
-
-echo "Merged ./dist/encode and ./dist/decode into ./dist/final (duplicates removed)"
+echo "Merged unique files from ./dist/encode and ./dist/decode into ./dist/final (duplicates removed, subdirectories preserved)"
