@@ -22,37 +22,49 @@ pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build encod
 
 pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build decode.py
 
-# Merge unique files from encode and decode into final, preserving subdirectory structure
+# Helper: Hash all files in a directory, outputting "<hash> <relative_path>"
+hash_files_py="
+import sys, hashlib, os
+root = sys.argv[1]
+for dirpath, _, files in os.walk(root):
+    for fname in files:
+        fpath = os.path.join(dirpath, fname)
+        rel = os.path.relpath(fpath, root)
+        with open(fpath, 'rb') as f:
+            h = hashlib.sha3_512(f.read()).hexdigest()
+        print(f'{h} {rel}')
+"
+
+# Hash and collect all files from encode and decode
 mkdir -p ./dist/final
 
-# Function to process a directory (encode or decode)
-process_dir() {
-    src_dir="$1"
-    find "$src_dir" -type f | while read -r src_file; do
-        rel_path="${src_file#$src_dir/}"
-        dest_file="./dist/final/$rel_path"
-        # Use Python to compute SHA3-512 hash for cross-platform compatibility
-        src_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$src_file','rb').read()).hexdigest())")
-        if [ -f "$dest_file" ]; then
-            dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest_file','rb').read()).hexdigest())")
-            if [ "$src_hash" != "$dest_hash" ]; then
-                # Different content, copy and overwrite
-                mkdir -p "$(dirname "$dest_file")"
-                cp "$src_file" "$dest_file"
-                echo "Overwritten: $rel_path (different content)"
-            else
-                echo "Skipped: $rel_path (identical file exists)"
-            fi
-        else
-            # File does not exist, copy and preserve subdirectories
-            mkdir -p "$(dirname "$dest_file")"
-            cp "$src_file" "$dest_file"
-            echo "Copied: $rel_path (new file)"
-        fi
-    done
-}
+python -c "$hash_files_py" ./dist/encode > /tmp/encode_hashes.txt
+python -c "$hash_files_py" ./dist/decode > /tmp/decode_hashes.txt
 
-process_dir ./dist/encode
-process_dir ./dist/decode
+# Merge hashes, keeping track of what has been copied
+cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read hash relpath; do
+    dest="./dist/final/$relpath"
+    src=""
+    if [ -f "./dist/encode/$relpath" ]; then
+        src="./dist/encode/$relpath"
+    elif [ -f "./dist/decode/$relpath" ]; then
+        src="./dist/decode/$relpath"
+    fi
+    # Only copy if this hash/relpath combo hasn't been seen yet
+    if [ ! -f "$dest" ]; then
+        mkdir -p "$(dirname "$dest")"
+        cp "$src" "$dest"
+        echo "Copied: $relpath (new file)"
+    else
+        # Compare hash of existing file
+        dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest','rb').read()).hexdigest())")
+        if [ "$dest_hash" != "$hash" ]; then
+            cp "$src" "$dest"
+            echo "Overwritten: $relpath (different content)"
+        else
+            echo "Skipped: $relpath (identical file exists)"
+        fi
+    fi
+done
 
 echo "Merged unique files from ./dist/encode and ./dist/decode into ./dist/final (duplicates removed, subdirectories preserved)"
