@@ -15,5 +15,5 @@ if [ -d "./dist/" ]; then
 fi
 
 # Create a executable (for testing purposes)
-pyinstaller --clean --noconfirm --debug all --noconsole --distpath ./dist/_internal encrypt.py
-pyinstaller --clean --noconfirm --debug all --noconsole --distpath ./dist/_internal decrypt.py
+pyinstaller --clean --noconfirm --debug all --noconsole --distpath ./dist/_internal encode.py
+pyinstaller --clean --noconfirm --debug all --noconsole --distpath ./dist/_internal decode.py
