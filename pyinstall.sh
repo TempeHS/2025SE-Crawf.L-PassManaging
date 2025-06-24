@@ -43,7 +43,12 @@ python -c "$hash_files_py" ./dist/encode > /tmp/encode_hashes.txt
 python -c "$hash_files_py" ./dist/decode > /tmp/decode_hashes.txt
 
 # Merge hashes, keeping track of what has been copied
-cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read hash relpath; do
+cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
+    # Skip lines that do not have both hash and relpath
+    if [ -z "$hash" ] || [ -z "$relpath" ]; then
+        continue
+    fi
+
     dest="./dist/final/$relpath"
     src=""
     # Try encode first, then decode
@@ -59,7 +64,6 @@ cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read hash relpath; do
             cp "$src" "$dest"
             echo "Copied: $relpath (new file)"
         else
-            # Compare hash of existing file
             dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest','rb').read()).hexdigest())")
             if [ "$dest_hash" != "$hash" ]; then
                 cp "$src" "$dest"
