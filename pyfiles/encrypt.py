@@ -42,8 +42,10 @@ class AESFileEncryptor:
         return hasher.hexdigest()
 
     def encrypt_file(self, password: str, input_path: str, output_path: str):
-        """Encrypt a file using AES-256-CBC in chunks, storing salt, IV, 
-        SHA3-512 hash, then ciphertext."""
+        """
+        Encrypt a file using AES-256-CBC in chunks, storing salt, IV,
+        SHA3-512 hash, then ciphertext.
+        """
         if not password:
             raise ValueError("Password must not be empty for encryption.")
         try:
