@@ -42,34 +42,49 @@ mkdir -p ./dist/final
 python -c "$hash_files_py" ./dist/encode > /tmp/encode_hashes.txt
 python -c "$hash_files_py" ./dist/decode > /tmp/decode_hashes.txt
 
+# Hash all files in final (if any)
+python -c "$hash_files_py" ./dist/final > /tmp/final_hashes.txt
+
+# Build a lookup table of relpath -> hash for final
+declare -A final_hashes
+while read -r hash relpath; do
+    final_hashes["$relpath"]="$hash"
+done < <(awk 'NF==2' /tmp/final_hashes.txt)
+
 # Merge hashes, keeping track of what has been copied
 awk 'NF==2' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
-    # Remove leading/trailing whitespace from relpath
+    echo "[DEBUG] Processing line: hash='$hash', relpath='$relpath'"
     relpath="$(echo "$relpath" | xargs)"
     if [ -z "$hash" ] || [ -z "$relpath" ]; then
-        echo "Skipped: malformed line (hash='$hash', relpath='$relpath')"
+        echo "[DEBUG] Skipped: malformed line (hash='$hash', relpath='$relpath')"
         continue
     fi
 
     dest="./dist/final/$relpath"
     src=""
-    # Try encode first, then decode
     if [ -f "./dist/encode/$relpath" ]; then
         src="./dist/encode/$relpath"
+        echo "[DEBUG] Found in encode: $src"
     elif [ -f "./dist/decode/$relpath" ]; then
         src="./dist/decode/$relpath"
+        echo "[DEBUG] Found in decode: $src"
+    else
+        echo "[DEBUG] Source file not found for: $relpath"
     fi
 
     if [ -n "$src" ] && [ -f "$src" ]; then
         mkdir -p "$(dirname "$dest")"
-        if [ ! -f "$dest" ]; then
+        final_hash="${final_hashes[$relpath]}"
+        if [ -z "$final_hash" ]; then
             cp "$src" "$dest"
             echo "Copied: $relpath (new file)"
+            final_hashes["$relpath"]="$hash"
         else
-            dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest','rb').read()).hexdigest())")
-            if [ "$dest_hash" != "$hash" ]; then
+            echo "[DEBUG] Comparing dest hash: $final_hash with source hash: $hash for $relpath"
+            if [ "$final_hash" != "$hash" ]; then
                 cp "$src" "$dest"
                 echo "Overwritten: $relpath (different content)"
+                final_hashes["$relpath"]="$hash"
             else
                 echo "Skipped: $relpath (identical file exists)"
             fi
@@ -77,6 +92,7 @@ awk 'NF==2' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash r
     else
         echo "Skipped: $relpath (source file not found)"
     fi
+    echo "[DEBUG] Finished processing: $relpath"
 done
 
 echo "Merged unique files from ./dist/encode and ./dist/decode into ./dist/final (duplicates removed, subdirectories preserved)"
