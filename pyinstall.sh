@@ -22,28 +22,10 @@ pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build encod
 
 pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build decode.py
 
-# Helper: Hash all files in a directory, outputting "<hash> <relative_path>"
-hash_files_py="
-import sys, hashlib, os
-root = sys.argv[1]
-for dirpath, _, files in os.walk(root):
-    for fname in files:
-        fpath = os.path.join(dirpath, fname)
-        rel = os.path.relpath(fpath, root)
-        rel = rel.replace('\\\\', '/')  # Always use forward slashes
-        with open(fpath, 'rb') as f:
-            h = hashlib.sha3_512(f.read()).hexdigest()
-        print(f'{h} {rel}')
-"
-
-# Hash and collect all files from encode and decode
-mkdir -p ./dist/final
-
-python -c "$hash_files_py" ./dist/encode > /tmp/encode_hashes.txt
-python -c "$hash_files_py" ./dist/decode > /tmp/decode_hashes.txt
-
-# Hash all files in final (if any)
-python -c "$hash_files_py" ./dist/final > /tmp/final_hashes.txt
+# Use multithreaded Python script for hashing
+python hash_files_mt.py ./dist/encode > /tmp/encode_hashes.txt
+python hash_files_mt.py ./dist/decode > /tmp/decode_hashes.txt
+python hash_files_mt.py ./dist/final > /tmp/final_hashes.txt
 
 # Build a lookup table of relpath -> hash for final
 declare -A final_hashes
