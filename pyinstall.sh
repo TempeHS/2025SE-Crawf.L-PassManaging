@@ -22,65 +22,26 @@ pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build encod
 
 pyinstaller --clean --noconfirm --debug all --noconsole --specpath ./build decode.py
 
-# Use multithreaded Python script for hashing
-python hash_files_mt.py ./dist/encode > /tmp/encode_hashes.txt
-python hash_files_mt.py ./dist/decode > /tmp/decode_hashes.txt
-python hash_files_mt.py ./dist/final > /tmp/final_hashes.txt
-
-# Build a lookup table of relpath -> hash for final
-declare -A final_hashes
-while read -r hash relpath; do
-    final_hashes["$relpath"]="$hash"
-done < <(awk 'NF==2' /tmp/final_hashes.txt)
-
-# Merge hashes, keeping track of what has been copied
-awk '{print $1, $2}' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
-    echo "[DEBUG] Processing line: hash='$hash', relpath='$relpath'"
-    relpath="$(echo "$relpath" | xargs)"
-    if [ -z "$hash" ] || [ -z "$relpath" ]; then
-        echo "[DEBUG] Skipped: malformed line (hash='$hash', relpath='$relpath')"
-        continue
-    fi
-
-    dest="./dist/final/$relpath"
-    src=""
-    if [ -f "./dist/encode/$relpath" ]; then
-        src="./dist/encode/$relpath"
-        echo "[DEBUG] Found in encode: $src"
-    elif [ -f "./dist/decode/$relpath" ]; then
-        src="./dist/decode/$relpath"
-        echo "[DEBUG] Found in decode: $src"
-    else
-        echo "[DEBUG] Source file not found for: $relpath"
-    fi
-
-    if [ -n "$src" ] && [ -f "$src" ]; then
-        mkdir -p "$(dirname "$dest")"
-        final_hash="${final_hashes[$relpath]}"
-        if [ -z "$final_hash" ]; then
-            start_time=$(date +%s.%N)
-            cp "$src" "$dest"
-            end_time=$(date +%s.%N)
-            duration=$(echo "$end_time - $start_time" | bc)
-            echo "Copied: $relpath (new file) [COPY TIMESTAMP] $(date '+%Y-%m-%d %H:%M:%S') duration: ${duration}s"
-            final_hashes["$relpath"]="$hash"
-        else
-            echo "[DEBUG] Comparing dest hash: $final_hash with source hash: $hash for $relpath"
-            if [ "$final_hash" != "$hash" ]; then
+# Merge files from encode and decode into final, preserving subdirectory structure, skipping files that already exist
+for srcdir in ./dist/encode ./dist/decode; do
+    if [ -d "$srcdir" ]; then
+        find "$srcdir" -type f | while read -r src; do
+            relpath="${src#$srcdir/}"
+            dest="./dist/final/$relpath"
+            if [ -f "$dest" ]; then
+                echo "Skipped: $relpath (already exists in final)"
+            else
+                mkdir -p "$(dirname "$dest")"
                 start_time=$(date +%s.%N)
                 cp "$src" "$dest"
                 end_time=$(date +%s.%N)
                 duration=$(echo "$end_time - $start_time" | bc)
-                echo "Overwritten: $relpath (different content) [COPY TIMESTAMP] $(date '+%Y-%m-%d %H:%M:%S') duration: ${duration}s"
-                final_hashes["$relpath"]="$hash"
-            else
-                echo "Skipped: $relpath (identical file exists)"
+                echo "Copied: $relpath [COPY TIMESTAMP] $(date '+%Y-%m-%d %H:%M:%S') duration: ${duration}s"
             fi
-        fi
+        done
     else
-        echo "Skipped: $relpath (source file not found)"
+        echo "Source directory not found: $srcdir"
     fi
-    echo "[DEBUG] Finished processing: $relpath"
 done
 
-echo "Merged unique files from ./dist/encode and ./dist/decode into ./dist/final (duplicates removed, subdirectories preserved)"
+echo "Merged files from ./dist/encode and ./dist/decode into ./dist/final (skipped files that already exist, subdirectories preserved)"
