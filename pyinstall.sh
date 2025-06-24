@@ -34,7 +34,7 @@ while read -r hash relpath; do
 done < <(awk 'NF==2' /tmp/final_hashes.txt)
 
 # Merge hashes, keeping track of what has been copied
-awk 'NF==2' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
+awk '{print $1, $2}' /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read -r hash relpath; do
     echo "[DEBUG] Processing line: hash='$hash', relpath='$relpath'"
     relpath="$(echo "$relpath" | xargs)"
     if [ -z "$hash" ] || [ -z "$relpath" ]; then
