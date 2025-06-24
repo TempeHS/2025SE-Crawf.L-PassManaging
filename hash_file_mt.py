@@ -50,7 +50,9 @@ def copy_file(job):
     )  # Warn if hashes do not match
     print(
         f"Copied: {relpath} [COPY TIMESTAMP] {time.strftime('%Y-%m-%d %H:%M:%S')} duration: {end-start:.4f}s\n"
-        f"  SHA2-256 src: \t{src_hash}\n  SHA2-256 dest: \t{dest_hash}\n  Hash check: \t{hash_status}"
+        f"  SHA2-256 src:    {src_hash}\n"
+        f"  SHA2-256 dest:   {dest_hash}\n"
+        f"  Hash check:      {hash_status}\n"
     )
     if hash_status != "OK":
         print(f"WARNING: Hash mismatch for {relpath}! File may be corrupted.")
