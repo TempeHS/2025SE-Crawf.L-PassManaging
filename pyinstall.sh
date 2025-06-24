@@ -46,29 +46,30 @@ python -c "$hash_files_py" ./dist/decode > /tmp/decode_hashes.txt
 cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read hash relpath; do
     dest="./dist/final/$relpath"
     src=""
+    # Try encode first, then decode
     if [ -f "./dist/encode/$relpath" ]; then
         src="./dist/encode/$relpath"
     elif [ -f "./dist/decode/$relpath" ]; then
         src="./dist/decode/$relpath"
     fi
-    # Only copy if this hash/relpath combo hasn't been seen yet
-    if [ ! -f "$dest" ]; then
-        if [ -n "$src" ] && [ -f "$src" ]; then
-            mkdir -p "$(dirname "$dest")"
+
+    if [ -n "$src" ] && [ -f "$src" ]; then
+        mkdir -p "$(dirname "$dest")"
+        if [ ! -f "$dest" ]; then
             cp "$src" "$dest"
             echo "Copied: $relpath (new file)"
         else
-            echo "Skipped: $relpath (source file not found)"
+            # Compare hash of existing file
+            dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest','rb').read()).hexdigest())")
+            if [ "$dest_hash" != "$hash" ]; then
+                cp "$src" "$dest"
+                echo "Overwritten: $relpath (different content)"
+            else
+                echo "Skipped: $relpath (identical file exists)"
+            fi
         fi
     else
-        # Compare hash of existing file
-        dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest','rb').read()).hexdigest())")
-        if [ "$dest_hash" != "$hash" ]; then
-            cp "$src" "$dest"
-            echo "Overwritten: $relpath (different content)"
-        else
-            echo "Skipped: $relpath (identical file exists)"
-        fi
+        echo "Skipped: $relpath (source file not found)"
     fi
 done
 
