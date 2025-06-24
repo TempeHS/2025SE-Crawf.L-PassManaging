@@ -40,10 +40,15 @@ def user_data_path(filename):
     Get a path for user data files in the user's home directory.
     This function creates a directory named ".simple_app_data" in the user's home
     directory. If it does not exist, and returns the full path to the specified filename.
+
     ### For Windows:
-        r"C:\Users\<username>\.simple_app_data\<filename>"
+
+        "C:\\Users\\<username>\\.simple_app_data\\<filename>"
+
     ### For Linux/Mac:
-        r"/home/<username>/.simple_app_data/<filename>"
+
+        "/home/<username>/.simple_app_data/<filename>"
+
     Args:
         filename (str): The name of the file to be stored in the user data directory.
     Returns:
