@@ -30,6 +30,7 @@ for dirpath, _, files in os.walk(root):
     for fname in files:
         fpath = os.path.join(dirpath, fname)
         rel = os.path.relpath(fpath, root)
+        rel = rel.replace('\\\\', '/')  # Always use forward slashes
         with open(fpath, 'rb') as f:
             h = hashlib.sha3_512(f.read()).hexdigest()
         print(f'{h} {rel}')
@@ -52,9 +53,13 @@ cat /tmp/encode_hashes.txt /tmp/decode_hashes.txt | while read hash relpath; do
     fi
     # Only copy if this hash/relpath combo hasn't been seen yet
     if [ ! -f "$dest" ]; then
-        mkdir -p "$(dirname "$dest")"
-        cp "$src" "$dest"
-        echo "Copied: $relpath (new file)"
+        if [ -n "$src" ] && [ -f "$src" ]; then
+            mkdir -p "$(dirname "$dest")"
+            cp "$src" "$dest"
+            echo "Copied: $relpath (new file)"
+        else
+            echo "Skipped: $relpath (source file not found)"
+        fi
     else
         # Compare hash of existing file
         dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest','rb').read()).hexdigest())")
