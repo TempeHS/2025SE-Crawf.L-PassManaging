@@ -19,7 +19,7 @@ mkdir -p ./dist/_internal
 
 # Build executables; .exe files go in ./dist, intermediates in ./dist/_internal
 pyinstaller --clean --noconfirm --debug all --noconsole \
-    --workpath ./dist/_internal --specpath ./building encode.py
+    --specpath ./building encode.py
 
 pyinstaller --clean --noconfirm --debug all --noconsole \
-    --workpath ./dist/_internal --specpath ./building decode.py
+    --specpath ./building decode.py
