@@ -26,6 +26,7 @@ def hash_file(args):
     return f"{hasher.hexdigest()} {rel}"
 
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
+max_workers = os.cpu_count()
+with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     for result in executor.map(hash_file, file_list):
         print(result)
