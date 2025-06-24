@@ -95,7 +95,7 @@ class DecodeApp(QWidget):
         self.submit_button.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
-        self.submit_button.clicked.connect(self.on_submit())
+        self.submit_button.clicked.connect(self.on_submit)
         layout.addWidget(self.submit_button)
 
     def on_submit(self) -> None:
