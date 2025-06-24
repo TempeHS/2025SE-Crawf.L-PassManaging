@@ -18,13 +18,20 @@ for dirpath, _, files in os.walk(root):
 def hash_file(args):
     fpath, rel = args
     hasher = hashlib.sha3_256()
+    start = time.time()
     with open(fpath, "rb") as f:
         while True:
             chunk = f.read(1024 * 1024)  # Read in 1MB chunks
             if not chunk:
                 break
             hasher.update(chunk)
-    return f"{hasher.hexdigest()} {rel}"
+    end = time.time()
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end))
+    duration = end - start
+    # Output: hash relpath [timestamp duration]
+    return (
+        f"{hasher.hexdigest()} {rel} [TIMESTAMP] {timestamp} duration: {duration:.4f}s"
+    )
 
 
 max_workers = os.cpu_count()
