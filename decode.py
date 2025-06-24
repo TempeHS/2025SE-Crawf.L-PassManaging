@@ -98,6 +98,8 @@ class DecodeApp(QWidget):
         self.submit_button.clicked.connect(self.on_submit)
         layout.addWidget(self.submit_button)
 
+        self.setLayout(layout)
+
     def on_submit(self) -> None:
         """
         Handle the submit button click event.
