@@ -31,9 +31,10 @@ process_dir() {
     find "$src_dir" -type f | while read -r src_file; do
         rel_path="${src_file#$src_dir/}"
         dest_file="./dist/final/$rel_path"
-        src_hash=$(sha3sum -a 512 "$src_file" | awk '{print $1}')
+        # Use Python to compute SHA3-512 hash for cross-platform compatibility
+        src_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$src_file','rb').read()).hexdigest())")
         if [ -f "$dest_file" ]; then
-            dest_hash=$(sha3sum -a 512 "$dest_file" | awk '{print $1}')
+            dest_hash=$(python -c "import hashlib; print(hashlib.sha3_512(open(r'$dest_file','rb').read()).hexdigest())")
             if [ "$src_hash" != "$dest_hash" ]; then
                 # Different content, copy and overwrite
                 mkdir -p "$(dirname "$dest_file")"
@@ -43,7 +44,7 @@ process_dir() {
                 echo "Skipped: $rel_path (identical file exists)"
             fi
         else
-            # File does not exist, copy and preserve subdirs
+            # File does not exist, copy and preserve subdirectories
             mkdir -p "$(dirname "$dest_file")"
             cp "$src_file" "$dest_file"
             echo "Copied: $rel_path (new file)"
