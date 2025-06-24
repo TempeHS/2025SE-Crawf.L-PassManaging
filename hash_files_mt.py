@@ -2,6 +2,7 @@ import sys
 import hashlib
 import os
 import concurrent.futures
+import time
 
 root = sys.argv[1]
 
@@ -27,6 +28,18 @@ def hash_file(args):
 
 
 max_workers = os.cpu_count()
+start = time.time()
+print(
+    f"[TIMESTAMP] Start hashing {len(file_list)} files at {time.strftime('%Y-%m-%d %H:%M:%S')} (epoch {start})",
+    flush=True,
+)
+
 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     for result in executor.map(hash_file, file_list):
         print(result)
+
+end = time.time()
+print(
+    f"[TIMESTAMP] Finished hashing at {time.strftime('%Y-%m-%d %H:%M:%S')} (epoch {end}), duration: {end-start:.2f} seconds",
+    flush=True,
+)
