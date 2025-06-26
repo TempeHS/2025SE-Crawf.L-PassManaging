@@ -29,6 +29,9 @@
 				"[python]": {
 					"editor.defaultFormatter": "ms-python.black-formatter"
 				},
+				"[xml]": {
+					"editor.defaultFormatter": "redhat.vscode-xml"
+				},
 				"editor.fontSize": 14,
 				"terminal.integrated.defaultProfile.windows": "Git Bash",
 				"window.restoreWindows": "preserve",
@@ -69,7 +72,8 @@
 				"ms-toolsai.vscode-jupyter-slideshow",
 				"ms-python.vscode-python-envs",
 				"iliazeus.vscode-ansi",
-				"ms-vscode.notepadplusplus-keybindings"
+				"ms-vscode.notepadplusplus-keybindings",
+				"redhat.vscode-xml"
 			]
 		}
 	},

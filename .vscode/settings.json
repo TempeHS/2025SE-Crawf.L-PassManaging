@@ -9,24 +9,24 @@
 		"*": true,
 		"plaintext": false,
 		"markdown": false,
-		"python": false,
+		"python": true,
 		"css": false,
 		"sql": false
 	},
 	"github.copilot.chat.codeGeneration.useInstructionFiles": true,
 	"github.copilot.chat.codeGeneration.instructions": [
 		{
-			"file": ".github/instructions/copilot.instructions.md"
+			"file": "./.github/instructions/copilot.instructions.md"
 		}
 	],
 	"github.copilot.chat.commitMessageGeneration.instructions": [
 		{
-			"file": ".github/instructions/copilot.instructions.md"
+			"file": "./.github/instructions/copilot.commit.instructions.md"
 		}
 	],
 	"github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
 		{
-			"file": ".github/instructions/copilot.instructions.md"
+			"file": "./.github/instructions/copilot.instructions.md"
 		}
 	]
 }

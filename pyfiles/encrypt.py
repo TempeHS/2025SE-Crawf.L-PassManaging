@@ -10,16 +10,20 @@ import hashlib
 class AESFileEncryptor:
     """AES-256 file encryptor and decryptor using Argon2ID-based key derivation."""
 
-    def __init__(self):
-        pass
+    def __init__(self, parent=None):
+        """
+        Optionally accept a parent object for integration with GUI frameworks.
+        Args:
+            parent (object, optional): Parent object, e.g., a QWidget. Defaults to None.
+        """
+        self.parent = parent
 
     def _derive_key(self, salt: bytes, password: str) -> bytes:
         """Derive a 256-bit key from the password and salt using Argon2ID."""
-        # These parameters should match your security requirements
         return argon2.low_level.hash_secret_raw(
             secret=password.encode(),
             salt=salt,
-            time_cost=20,
+            time_cost=14,
             memory_cost=131072,  # 128 MiB
             parallelism=4,
             hash_len=32,
@@ -38,20 +42,23 @@ class AESFileEncryptor:
         return hasher.hexdigest()
 
     def encrypt_file(self, password: str, input_path: str, output_path: str):
-        """Encrypt a file using AES-256-CBC in chunks, storing salt, IV, SHA3-512 hash, then ciphertext."""
+        """
+        Encrypt a file using AES-256-CBC in chunks, storing salt, IV,
+        SHA3-512 hash, then ciphertext.
+        """
         if not password:
             raise ValueError("Password must not be empty for encryption.")
         try:
             salt = os.urandom(16)
             key = self._derive_key(salt, password)
             iv = os.urandom(16)
+            file_hash = self._sha3_512_hash(input_path)
+            print(f"SHA3-512 hash of {input_path} (shortened): {file_hash:.12s}...")
             cipher = Cipher(
                 algorithm=algorithms.AES(key),
                 mode=modes.CBC(iv),
                 backend=default_backend(),
             )
-            file_hash = self._sha3_512_hash(input_path)
-            print(f"SHA3-512 hash of {input_path} (shortened): {file_hash:.12s}...")
             encryptor = cipher.encryptor()
             padder = padding.PKCS7(128).padder()
 
@@ -100,7 +107,9 @@ class AESFileEncryptor:
         """
         if not password:
             raise ValueError("Password must not be empty for decryption.")
+        # If file encryption fails and others
         try:
+            # if error occurs when reading file
             try:
                 with open(input_path, "rb") as infile:
                     salt = infile.read(16)
@@ -192,7 +201,7 @@ if __name__ == "__main__":
     fe = AESFileEncryptor()
     # Remove the encrypted and decrypted files if they exist
     for file_path in [
-        r"./pyfiles/.testing/pyinstall_help.txt.bin",
+        r"./pyfiles/.testing/pyinstall_help.txt.enc",
         r"./pyfiles/.testing/pyinstalled_help.txt",
     ]:
         try:
@@ -207,17 +216,17 @@ if __name__ == "__main__":
 
     start_encrypt = time.time()
     fe.encrypt_file(
-        password=r".",
+        password=r"safasdfasdfasdfasdfsdfaasdf",
         input_path=r"./pyfiles/.testing/pyinstall_help.txt",
-        output_path=r"./pyfiles/.testing/pyinstall_help.txt.bin",
+        output_path=r"./pyfiles/.testing/pyinstall_help.txt.enc",
     )
     end_encrypt = time.time()
     print(f"Encryption took {end_encrypt - start_encrypt:.3f} seconds.")
 
     start_decrypt = time.time()
     fe.decrypt_file(
-        password=r".",
-        input_path=r"./pyfiles/.testing/pyinstall_help.txt.bin",
+        password=r"safasdfasdfasdfasdfsdfaasdf",
+        input_path=r"./pyfiles/.testing/pyinstall_help.txt.enc",
         output_path=r"./pyfiles/.testing/pyinstalled_help.txt",
     )
     end_decrypt = time.time()

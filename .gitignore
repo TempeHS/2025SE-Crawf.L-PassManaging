@@ -1,7 +1,9 @@
 pyinstall_help.txt
-pyinstall.sh
-.github/instructions
+.github/instructions/
 .testing/
+# wix.sh
+
+.github/workflows/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
