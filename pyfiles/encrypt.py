@@ -23,8 +23,8 @@ class AESFileEncryptor:
         return argon2.low_level.hash_secret_raw(
             secret=password.encode(),
             salt=salt,
-            time_cost=14,
-            memory_cost=131072,  # 128 MiB
+            time_cost=20,
+            memory_cost=65536,  # 64 MiB
             parallelism=4,
             hash_len=32,
             type=argon2.low_level.Type.ID,
