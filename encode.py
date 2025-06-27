@@ -41,27 +41,35 @@ def user_data_path(filename):
     Get a path for user data files in the user's home directory.
     This function creates a directory named ".simple_app_data" in the user's home
     directory. If it does not exist, and returns the full path to the specified filename.
-
-    ### For Windows:
-
-        "C:\\Users\\<username>\\.simple_app_data\\<filename>"
-
-    ### For Linux/Mac:
-
-        "/home/<username>/.simple_app_data/<filename>"
-
-    Args:
-        filename (str): The name of the file to be stored in the user data directory.
-    Returns:
-        str: The full path to the specified file in the user data directory.
     """
     home_dir = os.path.expanduser("~")
     app_dir = os.path.join(home_dir, ".simple_app_data")
     os.makedirs(app_dir, exist_ok=True)
+    # Hide the folder and file on Windows
+    if os.name == "nt":
+        import ctypes
+
+        FILE_ATTRIBUTE_HIDDEN = 0x02
+        try:
+            ctypes.windll.kernel32.SetFileAttributesW(app_dir, FILE_ATTRIBUTE_HIDDEN)
+            ctypes.windll.kernel32.SetFileAttributesW(
+                os.path.join(app_dir, filename), FILE_ATTRIBUTE_HIDDEN
+            )
+        except Exception:
+            pass  # Ignore if fails (e.g., file doesn't exist yet)
     return os.path.join(app_dir, filename)
 
 
-class SimpleApp(QWidget):
+class EncodeApp(QWidget):
+    """
+    A simple application that allows users to encrypt a file with a password.
+    This application provides a user interface for entering a password,
+    confirming it, and encrypting a file using the AES encryption algorithm.
+    The encrypted file is saved in the user's home directory under a hidden
+    directory named ".simple_app_data". The application also provides feedback
+    to the user through message boxes for successful encryption, warnings, and errors.
+    """
+
     def __init__(self):
         super().__init__()
         self.fileencryptor = encrypt.AESFileEncryptor(self)
@@ -184,6 +192,6 @@ class SimpleApp(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = SimpleApp()
+    window = EncodeApp()
     window.show()
     app.exec()

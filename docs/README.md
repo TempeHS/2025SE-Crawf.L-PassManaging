@@ -1,7 +1,5 @@
 # 2025SE-Crawf.L-PassManaging
 
-[![Build Windows Executable](https://github.com/TempeHS/2025SE-Crawf.L-PassManaging/actions/workflows/windows-build-app.yml/badge.svg)](https://github.com/TempeHS/2025SE-Crawf.L-PassManaging/actions/workflows/windows-build-app.yml)
-
 Password manager for my major
 
 ## Building the Executable on Windows
@@ -23,5 +21,11 @@ Password manager for my major
 5. Install the required dependencies in `bash`:
    ``` bash
    pip install pyinstaller
-   pip install -r requirements.txt
+   pip install -r requirements.txt --upgrade
+   ```
+
+6. Run the installer script:
+   <!-- note -->
+   ``` bash
+   ./pyinstaller.sh
    ```
