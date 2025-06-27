@@ -76,4 +76,4 @@ This sprint was me about implementing `argon2id` with AES-256 encryption. I used
 
 ### About:
 
-Branch `storage` was the biggest sprint that I did. There was 86 commits in the [pull request #23](https://github.com/TempeHS/2025SE-Crawf.L-PassManaging/pull/23/commits).
+Branch `storage` was the biggest sprint that I did. There was 86 commits in the [pull request #23](https://github.com/TempeHS/2025SE-Crawf.L-PassManaging/pull/23/commits). I tried to automatically encrypt a SQLite3-based template database that is located within the installation folder, if it doesn't exist then it creates a database with the same layout within the Python script.
